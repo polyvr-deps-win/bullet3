@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# get script directory
+SOURCE="${BASH_SOURCE[0]}"
+DIR="$( dirname "$SOURCE" )"
+while [ -h "$SOURCE" ]
+do 
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  DIR="$( cd -P "$( dirname "$SOURCE"  )" && pwd )"
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+cd $DIR
+
+if [ ! -e build ]; then
+	mkdir build
+fi
+
+cd build
+
+cmake -DBUILD_PYBULLET=OFF -DUSE_DOUBLE_PRECISION=ON -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 15 2017 Win64" ..
+cmake --build . --config Release
+
+if [ ! -e c:/lib ]; then
+	mkdir c:/lib
+fi
+
+if [ ! -e c:/lib/bullet ]; then
+	mkdir c:/lib/bullet
+fi
+
+if [ ! -e c:/lib/bullet/lib ]; then
+	mkdir c:/lib/bullet/lib
+fi
+cp -rf lib/Release/* c:/lib/bullet/lib/
+
+d_inc="c:/lib/bullet/include"
+if [ -e $d_inc ]; then
+	rm -rf $d_inc
+fi
+cp -rf ../src $d_inc
+find $d_inc -name "*.cpp" -exec rm {} \;
+find $d_inc -name "*.txt" -exec rm {} \;
+
+
+
+
